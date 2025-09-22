@@ -1,11 +1,9 @@
-// Auto-generate Traveller ID on page load
+// Auto-generate Traveller ID and set min dates
 window.onload = function() {
-  // Generate Traveller ID
   const timestamp = Date.now();
   const travelerId = 'TRV' + timestamp.toString().slice(-6);
   document.getElementById('travelerId').value = travelerId;
 
-  // Set min date for Travel Date (today)
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('start').setAttribute('min', today);
   document.getElementById('return').setAttribute('min', today);
@@ -25,25 +23,28 @@ document.getElementById("travelForm").addEventListener("submit", function(event)
   const ret = document.getElementById("return").value;
   const purpose = document.getElementById("purpose").value;
 
-  // Additional check: Return date >= Travel date
   if (ret < start) {
     alert("Return Date cannot be earlier than Travel Date!");
     return;
   }
 
-  const subject = `TravelRequest_${type}`;
-  const body = `Dear Travel Desk,%0D%0A%0D%0A` +
-    `I would like to request approval for a ${type.toLowerCase()} travel.%0D%0A%0D%0A` +
-    `Traveller ID: ${travelerId}%0D%0A` +
-    `Traveller Name: ${name}%0D%0A` +
-    `Aadhar Card Number: ${aadhar}%0D%0A` +
-    `From Location: ${from}%0D%0A` +
-    `To Location: ${to}%0D%0A` +
-    `Travel Date: ${start}%0D%0A` +
-    `Return Date: ${ret}%0D%0A` +
-    `Purpose of Travel: ${purpose}%0D%0A%0D%0A` +
-    `Kindly process this request and forward it for approval.%0D%0A%0D%0A` +
-    `Thanks & Regards,%0D%0A${name}%0D%0ATraveller`;
+  const subject = encodeURIComponent(`TravelRequest_${type}`);
+  const body = encodeURIComponent(
+    `Dear Travel Desk,\n\n` +
+    `I would like to request approval for a ${type.toLowerCase()} travel.\n\n` +
+    `Traveller ID: ${travelerId}\n` +
+    `Traveller Name: ${name}\n` +
+    `Aadhar Card Number: ${aadhar}\n` +
+    `From Location: ${from}\n` +
+    `To Location: ${to}\n` +
+    `Travel Date: ${start}\n` +
+    `Return Date: ${ret}\n` +
+    `Purpose of Travel: ${purpose}\n\n` +
+    `Kindly process this request and forward it for approval.\n\n` +
+    `Thanks & Regards,\n${name}\nTraveller`
+  );
 
-  window.location.href = `mailto:gauravbagal66@gmail.com?subject=${subject}&body=${body}`;
+  // Gmail compose link
+  const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=traveldesk@company.com&su=${subject}&body=${body}`;
+  window.open(gmailLink, '_blank');
 });
