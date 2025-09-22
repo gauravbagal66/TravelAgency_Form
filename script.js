@@ -45,6 +45,6 @@ document.getElementById("travelForm").addEventListener("submit", function(event)
   );
 
   // Gmail compose link
-  const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=traveldesk@company.com&su=${subject}&body=${body}`;
+  const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=gauravbagal66@gmail.com&su=${subject}&body=${body}`;
   window.open(gmailLink, '_blank');
 });
