@@ -1,4 +1,5 @@
-// Auto-generate Traveller ID and set min dates
+// Include SheetJS in HTML: <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
 window.onload = function() {
   const timestamp = Date.now();
   const travelerId = 'TRV' + timestamp.toString().slice(-6);
@@ -9,42 +10,54 @@ window.onload = function() {
   document.getElementById('return').setAttribute('min', today);
 }
 
-// Form submission
+function generateExcel(travelerData) {
+  const ws = XLSX.utils.json_to_sheet([travelerData]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "TravelRequest");
+  XLSX.writeFile(wb, `${travelerData.TravellerID}.xlsx`);
+}
+
 document.getElementById("travelForm").addEventListener("submit", function(event) {
   event.preventDefault();
 
-  const travelerId = document.getElementById("travelerId").value;
-  const type = document.getElementById("type").value;
-  const name = document.getElementById("name").value;
-  const aadhar = document.getElementById("aadhar").value;
-  const from = document.getElementById("from").value;
-  const to = document.getElementById("to").value;
-  const start = document.getElementById("start").value;
-  const ret = document.getElementById("return").value;
-  const purpose = document.getElementById("purpose").value;
+  const travelerData = {
+    TravellerID: document.getElementById("travelerId").value,
+    Name: document.getElementById("name").value,
+    Aadhar: document.getElementById("aadhar").value,
+    TravelType: document.getElementById("type").value,
+    From: document.getElementById("from").value,
+    To: document.getElementById("to").value,
+    TravelDate: document.getElementById("start").value,
+    ReturnDate: document.getElementById("return").value,
+    Purpose: document.getElementById("purpose").value
+  };
 
-  if (ret < start) {
+  if (travelerData.ReturnDate < travelerData.TravelDate) {
     alert("Return Date cannot be earlier than Travel Date!");
     return;
   }
 
-  const subject = encodeURIComponent(`TravelRequest_${type}`);
+  // Generate Excel file
+  generateExcel(travelerData);
+
+  // Keep the previous mail body exactly as it was
+  const subject = encodeURIComponent(`TravelRequest_${travelerData.TravelType}`);
   const body = encodeURIComponent(
     `Dear Travel Desk,\n\n` +
-    `I would like to request approval for a ${type.toLowerCase()} travel.\n\n` +
-    `Traveller ID: ${travelerId}\n` +
-    `Traveller Name: ${name}\n` +
-    `Aadhar Card Number: ${aadhar}\n` +
-    `From Location: ${from}\n` +
-    `To Location: ${to}\n` +
-    `Travel Date: ${start}\n` +
-    `Return Date: ${ret}\n` +
-    `Purpose of Travel: ${purpose}\n\n` +
+    `I would like to request approval for a ${travelerData.TravelType.toLowerCase()} business trip.\n\n` +
+    `Traveller Name: ${travelerData.Name}\n` +
+    `Aadhar Card Number: ${travelerData.Aadhar}\n` +
+    `From Location: ${travelerData.From}\n` +
+    `To Location: ${travelerData.To}\n` +
+    `Travel Date: ${travelerData.TravelDate}\n` +
+    `Return Date: ${travelerData.ReturnDate}\n` +
+    `Purpose of Travel: ${travelerData.Purpose}\n\n` +
     `Kindly process this request and forward it for approval.\n\n` +
-    `Thanks & Regards,\n${name}\nTraveller`
+    `Thanks & Regards,\n${travelerData.Name}\nTraveller`
   );
 
-  // Gmail compose link
   const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=gauravbagal66@gmail.com&su=${subject}&body=${body}`;
   window.open(gmailLink, '_blank');
+
+  // User manually attaches the Excel file
 });
